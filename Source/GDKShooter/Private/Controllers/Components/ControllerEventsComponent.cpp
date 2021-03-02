@@ -31,6 +31,10 @@ void UControllerEventsComponent::Death_Implementation(const AController* Killer)
 			ClientInformOfDeath(TEXT("") /*PlayerName*/, -1 /*PlayerID*/);
 		}
 	}
+	else //Offloaded NPC
+	{
+		ClientInformOfDeath(TEXT(""), -1);
+	}
 }
 
 void UControllerEventsComponent::Kill_Implementation(const AController* Victim)
