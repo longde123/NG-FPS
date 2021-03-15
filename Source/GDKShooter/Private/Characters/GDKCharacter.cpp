@@ -11,6 +11,7 @@
 #include "Controllers/GDKPlayerController.h"
 #include "Controllers/Components/ControllerEventsComponent.h"
 #include "Weapons/Holdable.h"
+#include "BuildManagerComponent.h"
 
 AGDKCharacter::AGDKCharacter(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<UGDKMovementComponent>(ACharacter::CharacterMovementComponentName))
@@ -23,6 +24,8 @@ AGDKCharacter::AGDKCharacter(const FObjectInitializer& ObjectInitializer)
 	MetaDataComponent = CreateDefaultSubobject<UMetaDataComponent>(TEXT("MetaData"));
 	TeamComponent = CreateDefaultSubobject<UTeamComponent>(TEXT("Team"));
 	GDKMovementComponent = Cast<UGDKMovementComponent>(GetCharacterMovement());
+
+	BuildManager = CreateDefaultSubobject<UBuildManagerComponent>(TEXT("BuildManager"));
 }
 
 // Called when the game starts or when spawned
@@ -75,6 +78,11 @@ void AGDKCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	PlayerInputComponent->BindAction("ToggleMode", IE_Pressed, EquippedComponent, &UEquippedComponent::ToggleMode);
 	PlayerInputComponent->BindAction("ScrollUp", IE_Pressed, EquippedComponent, &UEquippedComponent::ScrollUp);
 	PlayerInputComponent->BindAction("ScrollDown", IE_Pressed, EquippedComponent, &UEquippedComponent::ScrollDown);
+
+	PlayerInputComponent->BindAction("ToggleBuildMode", IE_Pressed, BuildManager, &UBuildManagerComponent::ToggleBuildMode);
+	PlayerInputComponent->BindAction("RequestBuild", IE_Pressed, BuildManager, &UBuildManagerComponent::RequestBuild);
+
+
 }
 
 void AGDKCharacter::MoveForward(float Value)

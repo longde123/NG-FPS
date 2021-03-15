@@ -47,6 +47,9 @@ protected:
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UTeamComponent* TeamComponent;
 
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		class UBuildManagerComponent* BuildManager;
+
 	UFUNCTION(BlueprintPure)
 	float GetRemotePitch() {
 		return RemoteViewPitch;
