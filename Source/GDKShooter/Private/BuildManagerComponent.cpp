@@ -2,6 +2,7 @@
 
 
 #include "BuildManagerComponent.h"
+#include "Buildable.h"
 
 // Sets default values for this component's properties
 UBuildManagerComponent::UBuildManagerComponent()
@@ -11,6 +12,7 @@ UBuildManagerComponent::UBuildManagerComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	isBuilding = false;
+	canBuild = false;
 
 	// ...
 }
@@ -35,10 +37,59 @@ void UBuildManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (isBuilding) {
-		FVector location = getNextBuildLocation();
-		FRotator rotation = getNextBuildRotation();
+		FHitResult HitResult;
 
-		DrawDebugBox(GetWorld(), location, FVector(100, 100, 100), rotation.Quaternion(), FColor::Red, false, 0, 0, 10);
+		float LineTraceDistance = 1500.f;
+		float HeadOffset = 150.f;
+
+		FRotator CameraRotation = playerCamera->GetComponentRotation();
+		FVector Start = playerCamera->GetComponentLocation() + (CameraRotation.Vector() * HeadOffset);
+
+		FVector End = Start + (CameraRotation.Vector() * LineTraceDistance);
+
+		FCollisionQueryParams TraceParams(FName(TEXT("InteractTrace")), true, NULL);
+		TraceParams.bTraceComplex = true;
+		TraceParams.bReturnPhysicalMaterial = true;
+
+		bool bIsHit = GetWorld()->LineTraceSingleByChannel(
+			HitResult,      // FHitResult object that will be populated with hit info
+			Start,      // starting position
+			End,        // end position
+			ECC_GameTraceChannel3,  // collision channel - 3rd custom one
+			TraceParams      // additional trace settings
+		);
+
+		if (bIsHit)
+		{
+			// start to end, green, will lines always stay on, depth priority, thickness of line
+			DrawDebugLine(GetWorld(), Start, HitResult.ImpactPoint, FColor::Green, false, 5.f, ECC_WorldStatic, 1.f);
+
+			FRotator ProperRotation = HitResult.GetComponent()->GetComponentRotation();
+			ProperRotation.SetComponentForAxis(EAxis::Z, CameraRotation.GetComponentForAxis(EAxis::Z));
+
+			FVector ProperLocation = HitResult.ImpactPoint;
+
+			//DrawDebugBox(GetWorld(), HitResult.ImpactPoint, FVector(100, 100, 100), ProperRotation.Quaternion(), FColor::Red, false, 0, 0, 10);
+
+			if (currentBuildable == nullptr) {
+				currentBuildable = GetWorld()->SpawnActor<ABuildable>(ABuildable::StaticClass(), ProperLocation, ProperRotation);
+				DrawDebugBox(GetWorld(), ProperLocation, FVector(100, 100, 100), ProperRotation.Quaternion(), FColor::Red, false, 0, 0, 10);
+			}
+			else {
+				currentBuildable->SetActorLocationAndRotation(ProperLocation, ProperRotation);
+			}
+			canBuild = true;
+		}
+		else
+		{
+			// start to end, purple, will lines always stay on, depth priority, thickness of line
+			DrawDebugLine(GetWorld(), Start, End, FColor::Purple, false, 5.f, ECC_WorldStatic, 1.f);
+			canBuild = false;
+		}
+	}
+	else if(currentBuildable != nullptr) {
+		currentBuildable->Destroy();
+		currentBuildable = nullptr;
 	}
 
 	// ...
@@ -50,49 +101,10 @@ void UBuildManagerComponent::ToggleBuildMode() {
 }
 
 void UBuildManagerComponent::RequestBuild() {
-	GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, TEXT("RequestBuild"));
-}
-
-FVector UBuildManagerComponent::getNextBuildLocation() const{
-	FHitResult HitResult;
-
-	float LineTraceDistance = 1000.f;
-
-	FVector Start = playerCamera->GetComponentLocation()+50.f;
-	FRotator Rotation = playerCamera->GetComponentRotation();
-
-	FVector End = Start + (Rotation.Vector() * LineTraceDistance);
-	
-	FCollisionQueryParams TraceParams(FName(TEXT("InteractTrace")), true, NULL);
-	TraceParams.bTraceComplex = true;
-	TraceParams.bReturnPhysicalMaterial = true;
-
-	bool bIsHit = GetWorld()->LineTraceSingleByChannel(
-		HitResult,      // FHitResult object that will be populated with hit info
-		Start,      // starting position
-		End,        // end position
-		ECC_GameTraceChannel3,  // collision channel - 3rd custom one
-		TraceParams      // additional trace settings
-	);
-
-	if (bIsHit)
-	{
-		//GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, TEXT("Hit"));
-		// start to end, green, will lines always stay on, depth priority, thickness of line
-		DrawDebugLine(GetWorld(), Start, HitResult.ImpactPoint, FColor::Green, false, 5.f, ECC_WorldStatic, 1.f);
-		DrawDebugBox(GetWorld(), HitResult.ImpactPoint, FVector(100, 100, 100), Rotation.Quaternion(), FColor::Red, false, 0, 0, 10);
-		GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, FString::SanitizeFloat(HitResult.Distance));
-		return HitResult.ImpactPoint;
-	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, TEXT("Not hit"));
-		// start to end, purple, will lines always stay on, depth priority, thickness of line
-		DrawDebugLine(GetWorld(), Start, End, FColor::Purple, false, 5.f, ECC_WorldStatic, 1.f);
-		return FVector(0, 0, 0);
+	if (canBuild&&isBuilding) {
+		//GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, TEXT("RequestBuild"));
+		currentBuildable->Place();
+		currentBuildable = nullptr;
 	}
 }
 
-FRotator UBuildManagerComponent::getNextBuildRotation() const{
-	return playerCamera->GetComponentRotation();
-}

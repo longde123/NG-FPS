@@ -27,14 +27,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RequestBuild();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Building)
+		TSubclassOf<class ABuildable> BuildableFortification;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 private:
-	FVector getNextBuildLocation() const;
-	FRotator getNextBuildRotation() const;
 
 	bool isBuilding;
+	bool canBuild;
 	UCameraComponent *playerCamera;
+
+	ABuildable *currentBuildable;
 };
