@@ -81,6 +81,7 @@ void AGDKCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	PlayerInputComponent->BindAction("ToggleBuildMode", IE_Pressed, BuildManager, &UBuildManagerComponent::ToggleBuildMode);
 	PlayerInputComponent->BindAction("RequestBuild", IE_Pressed, BuildManager, &UBuildManagerComponent::RequestBuild);
+	PlayerInputComponent->BindAction("RequestBuild", IE_Released, BuildManager, &UBuildManagerComponent::ReleaseBuild);
 
 
 }

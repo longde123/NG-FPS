@@ -13,6 +13,7 @@ UBuildManagerComponent::UBuildManagerComponent()
 
 	isBuilding = false;
 	canBuild = false;
+	previewMode = true;
 
 	// ...
 }
@@ -37,9 +38,10 @@ void UBuildManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	if (isBuilding) {
+
 		FHitResult HitResult;
 
-		float LineTraceDistance = 1500.f;
+		float LineTraceDistance = 1800.f;
 		float HeadOffset = 150.f;
 
 		FRotator CameraRotation = playerCamera->GetComponentRotation();
@@ -55,35 +57,78 @@ void UBuildManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 			HitResult,      // FHitResult object that will be populated with hit info
 			Start,      // starting position
 			End,        // end position
-			ECC_GameTraceChannel3,  // collision channel - 3rd custom one
+			ECC_Visibility,  // collision channel
 			TraceParams      // additional trace settings
 		);
 
-		if (bIsHit)
-		{
+		currentTrace = HitResult.ImpactPoint;
+
+		//DrawPreview
+		if (bIsHit&&previewMode){
 			// start to end, green, will lines always stay on, depth priority, thickness of line
-			DrawDebugLine(GetWorld(), Start, HitResult.ImpactPoint, FColor::Green, false, 5.f, ECC_WorldStatic, 1.f);
+			//DrawDebugLine(GetWorld(), Start, HitResult.ImpactPoint, FColor::Green, false, 5.f, ECC_WorldStatic, 1.f);
 
 			FRotator ProperRotation = HitResult.GetComponent()->GetComponentRotation();
 			ProperRotation.SetComponentForAxis(EAxis::Z, CameraRotation.GetComponentForAxis(EAxis::Z));
 
 			FVector ProperLocation = HitResult.ImpactPoint;
+			
 
-			//DrawDebugBox(GetWorld(), HitResult.ImpactPoint, FVector(100, 100, 100), ProperRotation.Quaternion(), FColor::Red, false, 0, 0, 10);
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 			if (currentBuildable == nullptr) {
-				currentBuildable = GetWorld()->SpawnActor<ABuildable>(ABuildable::StaticClass(), ProperLocation, ProperRotation);
-				DrawDebugBox(GetWorld(), ProperLocation, FVector(100, 100, 100), ProperRotation.Quaternion(), FColor::Red, false, 0, 0, 10);
+				currentBuildable = GetWorld()->SpawnActor<ABuildable>(BuildableFortification, ProperLocation, ProperRotation, SpawnParams);
+				//DrawDebugBox(GetWorld(), ProperLocation, FVector(100, 100, 100), ProperRotation.Quaternion(), FColor::Red, false, 0, 0, 10);
 			}
 			else {
 				currentBuildable->SetActorLocationAndRotation(ProperLocation, ProperRotation);
 			}
 			canBuild = true;
+		}else if (bIsHit&&!previewMode){
+			FVector distanceCalculator = plantingPoint - currentTrace;
+			DrawDebugLine(GetWorld(), plantingPoint, currentTrace, FColor::Green, false, 5.f, ECC_WorldStatic, 1.f);
+			float distance = distanceCalculator.Size();
+			
+			
+
+			FString TheFloatStr = FString::SanitizeFloat(distance);
+			GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, *TheFloatStr);
+
+
+
+			//Get buildable lenght
+			FVector debugSize = currentBuildable->GetComponentsBoundingBox(true,true).GetExtent();
+			DrawDebugBox(GetWorld(), currentBuildable->GetTargetLocation(), debugSize, currentBuildable->GetActorRotation().Quaternion(), FColor::Red, false, 0, 0, 10);
+			
+			//Divide distance between planting point and currentTrace by buildable lenght
+			int amountOfCover = (distance / debugSize.Size());
+			
+			
+			TheFloatStr = FString::FromInt(amountOfCover);
+			GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Cyan, TheFloatStr);
+			
+			//for each full distance spawn a buidable and add it to managedBuildables
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+			for (int i = 0; i < amountOfCover; i++) {
+				FVector additiveVector = plantingPoint + (distanceCalculator * debugSize.Size() * (-1) * i);
+				managedBuildables.Add(GetWorld()->SpawnActor<ABuildable>(BuildableFortification, additiveVector, distanceCalculator.Rotation(), SpawnParams));
+			}
+
+			if (managedBuildables.Num() > amountOfCover) {
+				for (int i = amountOfCover; i < managedBuildables.Num(); i++) {
+					managedBuildables[i]->Destroy();
+					if (!managedBuildables[i]->IsPendingKill()) {
+						managedBuildables[i] = nullptr;
+					}
+				}
+			}
+
+
 		}
-		else
-		{
-			// start to end, purple, will lines always stay on, depth priority, thickness of line
-			DrawDebugLine(GetWorld(), Start, End, FColor::Purple, false, 5.f, ECC_WorldStatic, 1.f);
+		else if (!bIsHit) {
 			canBuild = false;
 		}
 	}
@@ -92,7 +137,6 @@ void UBuildManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 		currentBuildable = nullptr;
 	}
 
-	// ...
 }
 
 void UBuildManagerComponent::ToggleBuildMode() {
@@ -101,10 +145,35 @@ void UBuildManagerComponent::ToggleBuildMode() {
 }
 
 void UBuildManagerComponent::RequestBuild() {
-	if (canBuild&&isBuilding) {
-		//GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, TEXT("RequestBuild"));
-		currentBuildable->Place();
-		currentBuildable = nullptr;
+	if (canBuild) {
+		GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, TEXT("RequestBuild"));
+		previewMode = false;
+		plantingPoint = currentTrace;
 	}
 }
 
+void UBuildManagerComponent::ReleaseBuild(){
+	currentBuildable->Destroy();
+	currentBuildable = nullptr;
+
+
+	if (canBuild && isBuilding) {
+		for (int i = 0; i < managedBuildables.Num(); i++) {
+			managedBuildables[i]->Destroy();
+		}
+	}
+	managedBuildables.Empty();
+
+	/*
+
+	if (canBuild && isBuilding) {
+		GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, TEXT("ReleaseBuild"));
+
+		for (int i = 0; i < managedBuildables.Num(); i++) {
+			managedBuildables[i]->Place();
+		}
+		managedBuildables.Empty();
+	}
+	*/
+	previewMode = true;
+}

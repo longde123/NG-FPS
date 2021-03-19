@@ -27,6 +27,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void RequestBuild();
 
+	UFUNCTION(BlueprintCallable)
+		void ReleaseBuild();
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Building)
 		TSubclassOf<class ABuildable> BuildableFortification;
 
@@ -38,7 +41,14 @@ private:
 
 	bool isBuilding;
 	bool canBuild;
+	bool previewMode;
+
+	FVector plantingPoint;
+	FVector currentTrace;
+
 	UCameraComponent *playerCamera;
 
 	ABuildable *currentBuildable;
+
+	TArray<ABuildable*> managedBuildables;
 };
