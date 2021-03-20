@@ -111,20 +111,41 @@ void UBuildManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 			//for each full distance spawn a buidable and add it to managedBuildables
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
-			for (int i = 0; i < amountOfCover; i++) {
-				FVector additiveVector = plantingPoint + (distanceCalculator * debugSize.Size() * (-1) * i);
-				managedBuildables.Add(GetWorld()->SpawnActor<ABuildable>(BuildableFortification, additiveVector, distanceCalculator.Rotation(), SpawnParams));
+			if (managedBuildables.Num() < amountOfCover) {
+				for (int i = managedBuildables.Num(); i < amountOfCover; i++) {
+					FVector additiveVector = plantingPoint;
+					managedBuildables.Add(GetWorld()->SpawnActor<ABuildable>(BuildableFortification, additiveVector, distanceCalculator.Rotation(), SpawnParams));
+				}
 			}
+			TheFloatStr = FString::SanitizeFloat(managedBuildables.Num());
+			GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Blue, *TheFloatStr);
+
 
 			if (managedBuildables.Num() > amountOfCover) {
 				for (int i = amountOfCover; i < managedBuildables.Num(); i++) {
 					managedBuildables[i]->Destroy();
+					managedBuildables.RemoveAt(i);
+					/*
 					if (!managedBuildables[i]->IsPendingKill()) {
+						
 						managedBuildables[i] = nullptr;
 					}
+					*/
 				}
 			}
+
+			TheFloatStr = FString::SanitizeFloat(managedBuildables.Num());
+			GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Red, *TheFloatStr);
+
+			if (managedBuildables.Num() > 0) {
+				for (int i = 0; i < managedBuildables.Num(); i++) {
+					FVector additiveVector = plantingPoint;
+					managedBuildables[i]->SetActorLocationAndRotation(additiveVector, distanceCalculator.Rotation());
+				}
+			}
+
+			TheFloatStr = FString::SanitizeFloat(managedBuildables.Num());
+			GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Orange, *TheFloatStr);
 
 
 		}
