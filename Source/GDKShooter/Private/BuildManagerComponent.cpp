@@ -86,68 +86,88 @@ void UBuildManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 			}
 			canBuild = true;
 		}else if (bIsHit&&!previewMode){
-			FVector distanceCalculator = plantingPoint - currentTrace;
+			FVector distanceCalculator = currentTrace - plantingPoint;
 			DrawDebugLine(GetWorld(), plantingPoint, currentTrace, FColor::Green, false, 5.f, ECC_WorldStatic, 1.f);
 			float distance = distanceCalculator.Size();
-			
-			
 
 			FString TheFloatStr = FString::SanitizeFloat(distance);
 			GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, *TheFloatStr);
 
 
-
 			//Get buildable lenght
 			FVector debugSize = currentBuildable->GetComponentsBoundingBox(true,true).GetExtent();
-			DrawDebugBox(GetWorld(), currentBuildable->GetTargetLocation(), debugSize, currentBuildable->GetActorRotation().Quaternion(), FColor::Red, false, 0, 0, 10);
 			
 			//Divide distance between planting point and currentTrace by buildable lenght
-			int amountOfCover = (distance / debugSize.Size());
-			
-			
-			TheFloatStr = FString::FromInt(amountOfCover);
-			GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Cyan, TheFloatStr);
-			
-			//for each full distance spawn a buidable and add it to managedBuildables
+			int amountOfCover = (distance / debugSize.Size())+1;
+
+			//For each full distance spawn a buidable and add it to managedBuildables
 			FActorSpawnParameters SpawnParams;
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 			if (managedBuildables.Num() < amountOfCover) {
 				for (int i = managedBuildables.Num(); i < amountOfCover; i++) {
-					FVector additiveVector = plantingPoint;
+					FVector additiveVector = plantingPoint + (distanceCalculator.GetSafeNormal() * (debugSize.Size() * i));
 					managedBuildables.Add(GetWorld()->SpawnActor<ABuildable>(BuildableFortification, additiveVector, distanceCalculator.Rotation(), SpawnParams));
 				}
 			}
-			TheFloatStr = FString::SanitizeFloat(managedBuildables.Num());
-			GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Blue, *TheFloatStr);
 
-
+			//Destroy extra buildables
 			if (managedBuildables.Num() > amountOfCover) {
 				for (int i = amountOfCover; i < managedBuildables.Num(); i++) {
 					managedBuildables[i]->Destroy();
 					managedBuildables.RemoveAt(i);
-					/*
-					if (!managedBuildables[i]->IsPendingKill()) {
-						
-						managedBuildables[i] = nullptr;
-					}
-					*/
 				}
 			}
 
-			TheFloatStr = FString::SanitizeFloat(managedBuildables.Num());
-			GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Red, *TheFloatStr);
-
+			//Fix rotation in real time
 			if (managedBuildables.Num() > 0) {
 				for (int i = 0; i < managedBuildables.Num(); i++) {
-					FVector additiveVector = plantingPoint;
-					managedBuildables[i]->SetActorLocationAndRotation(additiveVector, distanceCalculator.Rotation());
+					FVector additiveVector = plantingPoint + (distanceCalculator.GetSafeNormal() * (debugSize.Size() * i));
+
+					
+
+					//Shoot trace up
+					FVector endVectorCheck = additiveVector + (FVector(0, 0, 1) * 2000.f);
+					FHitResult HitResult1;
+
+					bool traceUp = GetWorld()->LineTraceSingleByChannel(
+						HitResult1,      // FHitResult object that will be populated with hit info
+						additiveVector,      // starting position
+						endVectorCheck,        // end position
+						ECC_Visibility,  // collision channel
+						TraceParams      // additional trace settings
+					);
+
+					//Shoot trace down
+					FVector endVectorCheck2 = additiveVector + (FVector(0, 0, -1) * 10000.f);
+					FHitResult HitResult2;
+					FVector startVector2;
+					if (traceUp) {
+						startVector2 = HitResult1.ImpactPoint;
+					}
+					else {
+						startVector2 = endVectorCheck;
+					}
+					bool traceDown = GetWorld()->LineTraceSingleByChannel(
+						HitResult2,      // FHitResult object that will be populated with hit info
+						startVector2,      // starting position
+						endVectorCheck2,        // end position
+						ECC_Visibility,  // collision channel
+						TraceParams      // additional trace settings
+					);
+
+					//If something is hit while going down, place the object there, else destroy it
+					FVector spawnVector;
+					if (traceDown) {
+						spawnVector = HitResult2.ImpactPoint;
+						FRotator finRotation = FRotator(spawnVector.Rotation().Pitch, distanceCalculator.Rotation().Yaw, spawnVector.Rotation().Roll);
+						managedBuildables[i]->SetActorLocationAndRotation(spawnVector, finRotation);
+					}
+					else {
+						managedBuildables[i]->Destroy();
+						managedBuildables.RemoveAt(i);
+					}
 				}
 			}
-
-			TheFloatStr = FString::SanitizeFloat(managedBuildables.Num());
-			GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Orange, *TheFloatStr);
-
-
 		}
 		else if (!bIsHit) {
 			canBuild = false;
@@ -163,38 +183,40 @@ void UBuildManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 void UBuildManagerComponent::ToggleBuildMode() {
 	isBuilding = !isBuilding;
 	GEngine->AddOnScreenDebugMessage(-1,15,FColor::Green,TEXT("ToogleBuildMode"));
+	if (!canBuild || !isBuilding) {
+		for (int i = 0; i < managedBuildables.Num(); i++) {
+			managedBuildables[i]->Destroy();
+		}
+	}
+	managedBuildables.Empty();
 }
 
 void UBuildManagerComponent::RequestBuild() {
 	if (canBuild) {
 		GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, TEXT("RequestBuild"));
 		previewMode = false;
+		currentBuildable->PreviewMesh1->ToggleVisibility();
 		plantingPoint = currentTrace;
 	}
 }
 
-void UBuildManagerComponent::ReleaseBuild(){
+void UBuildManagerComponent::ReleaseBuild() {
 	currentBuildable->Destroy();
 	currentBuildable = nullptr;
 
 
 	if (canBuild && isBuilding) {
 		for (int i = 0; i < managedBuildables.Num(); i++) {
+			managedBuildables[i]->Place();
+		}
+	}
+
+	if (!canBuild || !isBuilding) {
+		for (int i = 0; i < managedBuildables.Num(); i++) {
 			managedBuildables[i]->Destroy();
 		}
 	}
 	managedBuildables.Empty();
-
-	/*
-
-	if (canBuild && isBuilding) {
-		GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, TEXT("ReleaseBuild"));
-
-		for (int i = 0; i < managedBuildables.Num(); i++) {
-			managedBuildables[i]->Place();
-		}
-		managedBuildables.Empty();
-	}
-	*/
+		
 	previewMode = true;
 }

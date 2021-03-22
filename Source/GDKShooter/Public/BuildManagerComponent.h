@@ -50,5 +50,7 @@ private:
 
 	ABuildable *currentBuildable;
 
+	void NormalizeBuildable();
+
 	TArray<ABuildable*> managedBuildables;
 };
