@@ -33,6 +33,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Building)
 		TSubclassOf<class ABuildable> BuildableFortification;
 
+	UFUNCTION(Server, reliable, WithValidation, BlueprintCallable)
+		void Server_PlaceBuildable(FVector const& Location, FRotator const& Rotation);
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -49,8 +52,6 @@ private:
 	UCameraComponent *playerCamera;
 
 	ABuildable *currentBuildable;
-
-	void NormalizeBuildable();
 
 	TArray<ABuildable*> managedBuildables;
 };

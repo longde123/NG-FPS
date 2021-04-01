@@ -26,6 +26,9 @@ AGDKCharacter::AGDKCharacter(const FObjectInitializer& ObjectInitializer)
 	GDKMovementComponent = Cast<UGDKMovementComponent>(GetCharacterMovement());
 
 	BuildManager = CreateDefaultSubobject<UBuildManagerComponent>(TEXT("BuildManager"));
+	if (BuildManager) {
+		BuildManager->SetIsReplicated(true);
+	}
 }
 
 // Called when the game starts or when spawned

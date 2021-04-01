@@ -3,6 +3,9 @@
 
 #include "BuildManagerComponent.h"
 #include "Buildable.h"
+#include "Runtime/Engine/Classes/Kismet/GameplayStatics.h"
+#include "GameFramework/Actor.h"
+#include "BuildableManager.h"
 
 // Sets default values for this component's properties
 UBuildManagerComponent::UBuildManagerComponent()
@@ -90,9 +93,10 @@ void UBuildManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 			DrawDebugLine(GetWorld(), plantingPoint, currentTrace, FColor::Green, false, 5.f, ECC_WorldStatic, 1.f);
 			float distance = distanceCalculator.Size();
 
+			/*
 			FString TheFloatStr = FString::SanitizeFloat(distance);
 			GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, *TheFloatStr);
-
+			*/
 
 			//Get buildable lenght
 			FVector debugSize = currentBuildable->GetComponentsBoundingBox(true,true).GetExtent();
@@ -207,7 +211,8 @@ void UBuildManagerComponent::ReleaseBuild() {
 
 	if (canBuild && isBuilding) {
 		for (int i = 0; i < managedBuildables.Num(); i++) {
-			managedBuildables[i]->Place();
+			Server_PlaceBuildable(managedBuildables[i]->GetActorLocation(), managedBuildables[i]->GetActorRotation());
+			managedBuildables[i]->Destroy();
 		}
 	}
 
@@ -220,3 +225,19 @@ void UBuildManagerComponent::ReleaseBuild() {
 		
 	previewMode = true;
 }
+
+bool UBuildManagerComponent::Server_PlaceBuildable_Validate(FVector const& Location, FRotator const& Rotation) {
+	return true;
+}
+
+void UBuildManagerComponent::Server_PlaceBuildable_Implementation(FVector const& Location, FRotator const& Rotation) {
+	
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABuildableManager::StaticClass(), FoundActors);
+	ABuildableManager* foundManager = Cast<ABuildableManager>(FoundActors[0]);
+	
+	GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, TEXT("UBuildManagerComponent::Server_PlaceBuildable_Implementation"));
+
+	foundManager->SpawnRequest(BuildableFortification, Location, Rotation);
+}
+

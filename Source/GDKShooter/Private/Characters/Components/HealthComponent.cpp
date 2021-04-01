@@ -16,9 +16,16 @@ UHealthComponent::UHealthComponent()
 
 	SetIsReplicatedByDefault(true);
 
-	MaxHealth = 100.f;
-	CurrentHealth = MaxHealth;
-	MaxArmour = 100.f;
+	if (startHealth == 0.f) {
+		startHealth = 100.f;
+	}
+	if (MaxHealth == 0.f) {
+		MaxHealth = 100.f;
+	}
+	CurrentHealth = startHealth;
+	if (MaxArmour == 0.f) {
+		MaxArmour = 100.f;
+	}
 	CurrentArmour = 0.f;
 }
 
@@ -29,7 +36,7 @@ void UHealthComponent::BeginPlay()
 
 	if (GetOwner()->HasAuthority())
 	{
-		CurrentHealth = MaxHealth;
+		CurrentHealth = startHealth;
 		CurrentArmour = 0.f;
 	}
 }
