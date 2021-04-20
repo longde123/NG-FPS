@@ -25,6 +25,8 @@ AGDKCharacter::AGDKCharacter(const FObjectInitializer& ObjectInitializer)
 	TeamComponent = CreateDefaultSubobject<UTeamComponent>(TEXT("Team"));
 	GDKMovementComponent = Cast<UGDKMovementComponent>(GetCharacterMovement());
 
+	TeamTag= CreateDefaultSubobject<UTagComponent>(TEXT("TeamTag"));
+
 	BuildManager = CreateDefaultSubobject<UBuildManagerComponent>(TEXT("BuildManager"));
 	if (BuildManager) {
 		BuildManager->SetIsReplicated(true);
@@ -175,6 +177,25 @@ float AGDKCharacter::TakeDamage(float Damage, const FDamageEvent& DamageEvent, A
 	TakeDamageCrossServer(Damage, DamageEvent, EventInstigator, DamageCauser);
 	return Damage;
 }
+
+
+void AGDKCharacter::AttachProtoTeamComponent(FGenericTeamId teamInt)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, FString::FromInt(this->GetComponents().Num()));
+	if (teamInt == 0) {
+		TeamTag = NewObject<UTagComponent>(this,UTagComponent::StaticClass(), TEXT("RedTeam"));
+		GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Red, TEXT("RedTeam"));
+	}
+	else {
+		TeamTag = NewObject<UTagComponent>(this, UTagComponent::StaticClass(), TEXT("BlueTeam"));
+		GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Blue, TEXT("BlueTeam"));
+
+	}
+	GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Yellow, FString::FromInt(this->GetComponents().Num()));
+	TeamTag->RegisterComponent();
+	GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Red, FString::FromInt(this->GetComponents().Num()));
+}
+
 
 void AGDKCharacter::TakeDamageCrossServer_Implementation(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {

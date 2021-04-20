@@ -2,7 +2,6 @@
 
 #include "Characters/Components/TeamComponent.h"
 #include "Net/UnrealNetwork.h"
-
 #include "Engine/World.h"
 
 
@@ -42,4 +41,9 @@ bool UTeamComponent::CanDamageActor(AActor* OtherActor)
 	}
 
 	return true;
+}
+
+void UTeamComponent::SetTeam(FGenericTeamId NewTeamId)
+{
+	TeamId = NewTeamId;
 }

@@ -40,6 +40,13 @@ void UBuildManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType,
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	FRotator CameraRotation1 = playerCamera->GetComponentRotation();
+	FVector Start1 = playerCamera->GetComponentLocation() + (CameraRotation1.Vector() * 150.f);
+
+	FVector end = Start1 + (CameraRotation1.Vector() * 20000.f);
+
+	//GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Purple, FString::FromInt(end.X) + " " + FString::FromInt(end.Y) + " " + FString::FromInt(end.Z));
+
 	if (isBuilding) {
 
 		FHitResult HitResult;
