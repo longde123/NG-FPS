@@ -109,6 +109,13 @@ void AProjectile::OnStop(const FHitResult& ImpactResult)
 	if (ExplodeOnStop && !bExploded)
 	{
 		Explode();
+
+		//Custom Take damage event test
+		FPointDamageEvent DmgEvent;
+		DmgEvent.DamageTypeClass = DamageTypeClass;
+		DmgEvent.HitInfo.ImpactPoint = ImpactResult.Location;
+
+		ImpactResult.Actor->TakeDamage(ExplosionDamage, DmgEvent, InstigatingController, this);
 	}
 }
 
