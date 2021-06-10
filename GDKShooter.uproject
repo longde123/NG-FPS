@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "",
+	"EngineAssociation": "{F384C8D6-45BF-912E-DF65-A2B2F4E9DFC7}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -12,7 +12,8 @@
 				"Engine",
 				"SpatialGDK",
 				"UMG",
-				"CoreUObject"
+				"CoreUObject",
+				"PhysXVehicles"
 			]
 		},
 		{
@@ -29,6 +30,11 @@
 		{
 			"Name": "ApexDestruction",
 			"Enabled": true
+		},
+		{
+			"Name": "OWIEnhancedVehicleMovement",
+			"Enabled": true,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/22f5211ad3744d948352de8b52e6fc8a"
 		}
 	]
 }
