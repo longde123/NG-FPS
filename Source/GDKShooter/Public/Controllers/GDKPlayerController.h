@@ -6,7 +6,14 @@
 #include "GameFramework/PlayerController.h"
 #include "Characters/Components/MetaDataComponent.h"
 #include "Game/Components/DeathmatchScoreComponent.h"
+#include "../TagComponent.h"
+#include "../TagComponent_BlueTeam.h"
+#include "../TagComponent_RedTeam.h"
+#include "../Buildable.h"
+#include "../TestTag.h"
 #include "Game/Components/MatchStateComponent.h"
+#include "SpatialGDK\Public\EngineClasses\Components\ActorInterestComponent.h"
+#include "Characters/GDKCharacter.h"
 #include "GDKPlayerController.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPawnEvent, APawn*, InPawn);
@@ -55,6 +62,39 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float LatestPawnYaw;
+
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		UActorInterestComponent* ActorInterestComponent;
+
+	UPROPERTY(VisibleAnywhere)
+		UCheckoutRadiusConstraint* PlayerBubble;
+
+	UPROPERTY(VisibleAnywhere)
+		UAndConstraint* PlayerBubbleAnd;
+
+	UPROPERTY(VisibleAnywhere)
+	UComponentClassConstraint* PlayerBubbleComponent;
+
+	UPROPERTY(VisibleAnywhere)
+		UAndConstraint* FOVConstraint1;
+
+	UPROPERTY(VisibleAnywhere)
+		USphereConstraint* Sphere1;
+
+	UPROPERTY(VisibleAnywhere)
+		URelativeSphereConstraint* RelativeSphere;
+	
+
+	UPROPERTY(VisibleAnywhere)
+		UActorClassConstraint* Actor1;
+
+
+	UFUNCTION(BlueprintCallable)
+		void QueryTest();
+
+	virtual void SetControlRotation(const FRotator& NewRotation) override;
+
+	int32 updateCounter;
 
 private:
 	// Requests to spawn player pawn and join play

@@ -100,6 +100,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, ReplicatedUsing = OnRep_CurrentHealth, Category = "Health")
 	float CurrentHealth;
 
+	UPROPERTY(EditDefaultsOnly, Category = "Health")
+		float startHealth;
+
 	// Max armour this character can have.
 	UPROPERTY(EditDefaultsOnly, Category = "Health", meta = (ClampMin = "1"))
 	float MaxArmour;

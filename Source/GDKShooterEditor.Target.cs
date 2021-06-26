@@ -10,5 +10,6 @@ public class GDKShooterEditorTarget : TargetRules
 		Type = TargetType.Editor;
 		ExtraModuleNames.Add("GDKShooter");
 		DefaultBuildSettings = BuildSettingsVersion.V2;
-	}
+        
+    }
 }

@@ -15,6 +15,7 @@
 #include "GDKLogging.h"
 #include "Math/NumericLimits.h"
 #include "Math/UnrealMathUtility.h"
+#include "Characters/GDKCharacter.h"
 
 DEFINE_LOG_CATEGORY(LogTeamDeathmatchSpawnerComponent)
 
@@ -121,6 +122,10 @@ void UTeamDeathmatchSpawnerComponent::RequestSpawn(APlayerController* Controller
 		if (UTeamComponent* TeamComponent = Cast<UTeamComponent>(NewPawn->GetComponentByClass(UTeamComponent::StaticClass())))
 		{
 			TeamComponent->SetTeam(FGenericTeamId(TeamId));
+
+			//Team Tag fix
+			//AGDKCharacter* MyChar = (AGDKCharacter*)TeamComponent->GetOwner();
+			//MyChar->AttachProtoTeamComponent(TeamId);
 		}
 		else
 		{
@@ -132,6 +137,10 @@ void UTeamDeathmatchSpawnerComponent::RequestSpawn(APlayerController* Controller
 			if (UTeamComponent* TeamComponent = Cast<UTeamComponent>(Controller->PlayerState->GetComponentByClass(UTeamComponent::StaticClass())))
 			{
 				TeamComponent->SetTeam(FGenericTeamId(TeamId));
+
+				//Team Tag fix
+				//AGDKCharacter* MyChar = (AGDKCharacter*)TeamComponent->GetOwner();
+				//MyChar->AttachProtoTeamComponent(TeamId);
 			}
 			else
 			{

@@ -38,7 +38,8 @@ public:
 	virtual bool CanDamageActor(AActor* OtherActor);
 
 	UFUNCTION(BlueprintCallable)
-	void SetTeam(FGenericTeamId NewTeamId) { TeamId = NewTeamId; }
+		void SetTeam(FGenericTeamId NewTeamId);
+
 
 	UFUNCTION(BlueprintPure)
 	FGenericTeamId GetTeam() const { return TeamId; }

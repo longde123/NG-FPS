@@ -11,6 +11,9 @@
 #include "Characters/Components/GDKMovementComponent.h"
 #include "Characters/Components/TeamComponent.h"
 #include "Weapons/Holdable.h"
+#include "../TagComponent.h"
+#include "../TagComponent_BlueTeam.h"
+#include "../TagComponent_RedTeam.h"
 #include "TimerManager.h"
 #include "Runtime/AIModule/Classes/GenericTeamAgentInterface.h"
 #include "Runtime/AIModule/Classes/Perception/AISightTargetInterface.h"
@@ -46,6 +49,9 @@ protected:
 
 	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UTeamComponent* TeamComponent;
+
+	UPROPERTY(Category = Character, VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+		class UBuildManagerComponent* BuildManager;
 
 	UFUNCTION(BlueprintPure)
 	float GetRemotePitch() {
@@ -84,10 +90,14 @@ private:
 
 	FTimerHandle DeletionTimer;
 	FTimerDelegate DeletionDelegate;
+
+	UTagComponent* TeamTag;
 	
 public:
 	float TakeDamage(float Damage, const struct FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	UFUNCTION(CrossServer, Reliable)
 	void TakeDamageCrossServer(float Damage, const struct FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
+
+	void AttachProtoTeamComponent(FGenericTeamId teamInt);
 };
