@@ -91,7 +91,7 @@ private:
 	FTimerHandle DeletionTimer;
 	FTimerDelegate DeletionDelegate;
 
-	UTagComponent* TeamTag;
+	//UTagComponent* TeamTag;
 	
 public:
 	float TakeDamage(float Damage, const struct FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
@@ -99,5 +99,6 @@ public:
 	UFUNCTION(CrossServer, Reliable)
 	void TakeDamageCrossServer(float Damage, const struct FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
 
-	void AttachProtoTeamComponent(FGenericTeamId teamInt);
+	//UFUNCTION(BlueprintCallable)
+	//void AttachProtoTeamComponent(FGenericTeamId teamInt);
 };

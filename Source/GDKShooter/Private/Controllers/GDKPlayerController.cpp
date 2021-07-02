@@ -55,10 +55,10 @@ AGDKPlayerController::AGDKPlayerController()
 
 	////
 
-	//Setup TeamTag query test
-	/*
-	RelativeSphere = CreateDefaultSubobject<URelativeSphereConstraint>(TEXT("Sphere1"));
-	RelativeSphere->Radius = 19500;
+	//[0] - Setup TeamTag query test - 200m can see enemy, but not friendly
+	
+	RelativeSphere = CreateDefaultSubobject<URelativeSphereConstraint>(TEXT("RelativeSphere"));
+	RelativeSphere->Radius = 10000;
 
 	Actor1 = CreateDefaultSubobject<UActorClassConstraint>(TEXT("Actor1"));
 	Actor1->ActorClass = APawn::StaticClass();
@@ -78,11 +78,11 @@ AGDKPlayerController::AGDKPlayerController()
 
 	//Add query to Actor Interest Component
 	ActorInterestComponent->Queries.Add(query);
-	*/
+	
 
 	///
 	
-	//Setup 1. Player bubble query - 50m at top frequency / all classes for now TODO modify for teams component
+	//[1] - Setup 1. Player bubble query - 50m at top frequency
 	PlayerBubble = CreateDefaultSubobject<UCheckoutRadiusConstraint>(TEXT("PlayerBubble"));
 	PlayerBubble->ActorClass = APawn::StaticClass();
 	PlayerBubble->Radius = 5000;
@@ -95,82 +95,12 @@ AGDKPlayerController::AGDKPlayerController()
 		
 	////
 
-	//Setup 2. Player bubble query - 350m at 1/6 / all classes for now TODO modify for teams component
-	PlayerBubble->ActorClass = APawn::StaticClass();
-	//PlayerBubble->Radius = 35000;
-	PlayerBubble->Radius = 35;
-
-	query.Constraint = PlayerBubble;
-	query.Frequency = 10;
-
-	//Add query to Actor Interest Component
-	ActorInterestComponent->Queries.Add(query);
-
-	////
-
-	//Setup 3. Player bubble query - 700m at 1/15 / all classes for now TODO modify for teams component
-	PlayerBubble->ActorClass = APawn::StaticClass();
-	//PlayerBubble->Radius = 70000;
-	PlayerBubble->Radius = 70;
-
-	query.Constraint = PlayerBubble;
-	query.Frequency = 4;
-
-	//Add query to Actor Interest Component
-	ActorInterestComponent->Queries.Add(query);
-
-	////
-
-	//Setup 4. Player bubble query - 2000m at 1/20 / all classes for now TODO modify for teams component
-	PlayerBubble->ActorClass = APawn::StaticClass();
-	//PlayerBubble->Radius = 200000;
-	PlayerBubble->Radius = 20;
-
-	query.Constraint = PlayerBubble;
-	query.Frequency = 3;
-
-	//Add query to Actor Interest Component
-	ActorInterestComponent->Queries.Add(query);
-
-	////
-
-	//Setup 5. Player bubble query - 6000m at 1/30 / all classes for now TODO modify for teams component
-	PlayerBubble->ActorClass = APawn::StaticClass();
-	//PlayerBubble->Radius = 600000;
-	PlayerBubble->Radius = 60;
-
-	query.Constraint = PlayerBubble;
-	query.Frequency = 2;
-
-	//Add query to Actor Interest Component
-	ActorInterestComponent->Queries.Add(query);
-
-	////
-
-
-	//Setup 6. Player bubble query - 19000m at 1/60 / all classes for now TODO modify for teams component
-	PlayerBubble->ActorClass = APawn::StaticClass();
-	//PlayerBubble->Radius = 1900000;
-	PlayerBubble->Radius = 19;
-
-	query.Constraint = PlayerBubble;
-	query.Frequency = 1;
-
-	//Add query to Actor Interest Component
-	ActorInterestComponent->Queries.Add(query);
-
-	////
-
-	//Setup 1. FOV Constraint query - 100m at top frequency / all classes for now TODO modify for teams component
+	//[2] - Setup 1. FOV Constraint query - 100m at top frequency
 	FOVConstraint1 = CreateDefaultSubobject<UAndConstraint>(TEXT("FOVConstraint1"));
 
 	Sphere1 = CreateDefaultSubobject<USphereConstraint>(TEXT("Sphere1"));
-	Sphere1->Radius = 10000;
+	Sphere1->Radius = 4000;
 	Sphere1->Center = FVector::ZeroVector;
-
-	Actor1 = CreateDefaultSubobject<UActorClassConstraint>(TEXT("Actor1"));
-	Actor1->ActorClass = APawn::StaticClass();
-	Actor1->bIncludeDerivedClasses = true;
 
 	FOVConstraint1->Constraints.Add(Sphere1);
 	FOVConstraint1->Constraints.Add(Actor1);
@@ -182,101 +112,8 @@ AGDKPlayerController::AGDKPlayerController()
 	ActorInterestComponent->Queries.Add(query);
 
 	////
-	/*
-	//Setup 2. FOV Constraint query - 350m at 1/2 frequency / all classes for now TODO modify for teams component
-	Sphere1->Radius = 35000;
-	Sphere1->Center = FVector::ZeroVector;
-
-	Actor1->ActorClass = APawn::StaticClass();
-	Actor1->bIncludeDerivedClasses = true;
-
-	FOVConstraint1->Constraints.Empty();
-
-	FOVConstraint1->Constraints.Add(Sphere1);
-	FOVConstraint1->Constraints.Add(Actor1);
-
-	query.Constraint = FOVConstraint1;
-	query.Frequency = 30;
-
-	//Add query to Actor Interst Component
-	ActorInterestComponent->Queries.Add(query);
-
-	//Setup 3. FOV Constraint query - 700m at 1/5 frequency / all classes for now TODO modify for teams component
-	Sphere1->Radius = 70000;
-	Sphere1->Center = FVector::ZeroVector;
-
-	Actor1->ActorClass = APawn::StaticClass();
-	Actor1->bIncludeDerivedClasses = true;
-
-	FOVConstraint1->Constraints.Empty();
-
-	FOVConstraint1->Constraints.Add(Sphere1);
-	FOVConstraint1->Constraints.Add(Actor1);
-
-	query.Constraint = FOVConstraint1;
-	query.Frequency = 12;
-
-	//Add query to Actor Interst Component
-	ActorInterestComponent->Queries.Add(query);
-
-	
-	//Setup 4. FOV Constraint query - 2000m at 1/8 frequency / all classes for now TODO modify for teams component
-	Sphere1->Radius = 200000;
-	Sphere1->Center = FVector::ZeroVector;
-
-	Actor1->ActorClass = APawn::StaticClass();
-	Actor1->bIncludeDerivedClasses = true;
-
-	FOVConstraint1->Constraints.Empty();
-
-	FOVConstraint1->Constraints.Add(Sphere1);
-	FOVConstraint1->Constraints.Add(Actor1);
-
-	query.Constraint = FOVConstraint1;
-	query.Frequency = 8;
-
-	//Add query to Actor Interst Component
-	ActorInterestComponent->Queries.Add(query);
-
-	//Setup 5. FOV Constraint query - 6000m at 1/12 frequency / all classes for now TODO modify for teams component
-	Sphere1->Radius = 600000;
-	Sphere1->Center = FVector::ZeroVector;
-
-	Actor1->ActorClass = APawn::StaticClass();
-	Actor1->bIncludeDerivedClasses = true;
-
-	FOVConstraint1->Constraints.Empty();
-
-	FOVConstraint1->Constraints.Add(Sphere1);
-	FOVConstraint1->Constraints.Add(Actor1);
-
-	query.Constraint = FOVConstraint1;
-	query.Frequency = 5;
-
-	//Add query to Actor Interst Component
-	ActorInterestComponent->Queries.Add(query);
-
-	//Setup 6. FOV Constraint query - 19000m at 1/20 frequency / all classes for now TODO modify for teams component
-	Sphere1->Radius = 1900000/2;
-	Sphere1->Center = FVector::ZeroVector;
-
-	Actor1->ActorClass = APawn::StaticClass();
-	Actor1->bIncludeDerivedClasses = true;
-
-	FOVConstraint1->Constraints.Empty();
-
-	FOVConstraint1->Constraints.Add(Sphere1);
-	FOVConstraint1->Constraints.Add(Actor1);
-
-	query.Constraint = FOVConstraint1;
-	query.Frequency = 3;
-
-	//Add query to Actor Interst Component
-	ActorInterestComponent->Queries.Add(query);
-	*/
 
 	////END
-	
 
 	//Initialize counter for update speed - workaround because we are calling directly in to the net driver without any other management
 	updateCounter = 0;
@@ -313,7 +150,6 @@ void AGDKPlayerController::SetPawn(APawn* InPawn)
 
 void AGDKPlayerController::QueryTest()
 {
-	
 	FVector vector;
 	FRotator rotator;
 	FVector end;
@@ -321,7 +157,8 @@ void AGDKPlayerController::QueryTest()
 	GetPlayerViewPoint(vector, rotator);
 
 	//1. FOV 100
-	end = vector + (rotator.Vector() * 10000.f);
+	end = vector + (rotator.Vector() * 4000.f);
+	//GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Yellow, end.ToString());
 
 	Sphere1->Center = end;
 
@@ -329,80 +166,24 @@ void AGDKPlayerController::QueryTest()
 	FOVConstraint1->Constraints.Add(Sphere1);
 	FOVConstraint1->Constraints.Add(Actor1);
 
-	ActorInterestComponent->Queries[6].Constraint=FOVConstraint1;
-	/*
-	//2. FOV 350
-	end = vector + (rotator.Vector() * 35000.f);
-
-	Sphere1->Center = end;
-
-	FOVConstraint1->Constraints.Empty();
-	FOVConstraint1->Constraints.Add(Sphere1);
-	FOVConstraint1->Constraints.Add(Actor1);
-
-	ActorInterestComponent->Queries[7].Constraint = FOVConstraint1;
-
-	//3. FOV 700
-	end = vector + (rotator.Vector() * 70000.f);
-
-	Sphere1->Center = end;
-
-	FOVConstraint1->Constraints.Empty();
-	FOVConstraint1->Constraints.Add(Sphere1);
-	FOVConstraint1->Constraints.Add(Actor1);
-
-	ActorInterestComponent->Queries[8].Constraint = FOVConstraint1;
-
+	ActorInterestComponent->Queries[2].Constraint=FOVConstraint1;
 	
-	//4. FOV 2000
-	end = vector + (rotator.Vector() * 200000.f);
-
-	Sphere1->Center = end;
-
-	FOVConstraint1->Constraints.Empty();
-	FOVConstraint1->Constraints.Add(Sphere1);
-	FOVConstraint1->Constraints.Add(Actor1);
-
-	ActorInterestComponent->Queries[9].Constraint = FOVConstraint1;
-
-	//5. FOV 6000
-	end = vector + (rotator.Vector() * 600000.f);
-
-	Sphere1->Center = end;
-
-	FOVConstraint1->Constraints.Empty();
-	FOVConstraint1->Constraints.Add(Sphere1);
-	FOVConstraint1->Constraints.Add(Actor1);
-
-	ActorInterestComponent->Queries[10].Constraint = FOVConstraint1;
-
-	//6. FOV 19000
-	end = vector + (rotator.Vector() * (1900000.f/2));
-
-	Sphere1->Center = end;
-
-	FOVConstraint1->Constraints.Empty();
-	FOVConstraint1->Constraints.Add(Sphere1);
-	FOVConstraint1->Constraints.Add(Actor1);
-
-	ActorInterestComponent->Queries[11].Constraint = FOVConstraint1;
-	
-
+	//End FOV
 	
 	//Update team component - call this seperately not every second
 	AGDKCharacter* charOwned = (AGDKCharacter*)GetPawn();
 	UTeamComponent* tcomp = charOwned->FindComponentByClass<UTeamComponent>();
 	if (tcomp->GetTeam()==0) {
 		//Is red team, get interst on Blue team
-		RelativeSphere->Radius = 20000;
+		RelativeSphere->Radius = 15000;
 		PlayerBubbleComponent->ComponentClass = UTagComponent::StaticClass();
-		GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Blue, charOwned->GetName() + " " + FString::FromInt(tcomp->GetTeam()));
+		//GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Blue, charOwned->GetName() + " " + FString::FromInt(tcomp->GetTeam()));
 
 	}
 	else {
-		RelativeSphere->Radius = 25000;
+		RelativeSphere->Radius = 20000;
 		PlayerBubbleComponent->ComponentClass = UTagComponent::StaticClass();
-		GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Red, charOwned->GetName() + " " + FString::FromInt(tcomp->GetTeam()));
+		//GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Red, charOwned->GetName() + " " + FString::FromInt(tcomp->GetTeam()));
 	}
 	
 
@@ -411,11 +192,11 @@ void AGDKPlayerController::QueryTest()
 	PlayerBubbleAnd->Constraints.Add(RelativeSphere);
 
 	ActorInterestComponent->Queries[0].Constraint = PlayerBubbleAnd;
-	*/
+	
 
 	USpatialNetDriver* driver =(Cast<USpatialNetDriver>(GetWorld()->GetNetDriver()));
 	USpatialSender* sender = driver->Sender;
-	//sender->UpdateInterestComponent(this);	
+	sender->UpdateInterestComponent(this);	
 	
 }
 

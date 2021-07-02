@@ -25,7 +25,7 @@ AGDKCharacter::AGDKCharacter(const FObjectInitializer& ObjectInitializer)
 	TeamComponent = CreateDefaultSubobject<UTeamComponent>(TEXT("Team"));
 	GDKMovementComponent = Cast<UGDKMovementComponent>(GetCharacterMovement());
 
-	TeamTag= CreateDefaultSubobject<UTagComponent>(TEXT("TeamTag"));
+	//TeamTag= CreateDefaultSubobject<UTagComponent>(TEXT("TeamTag"));
 
 	BuildManager = CreateDefaultSubobject<UBuildManagerComponent>(TEXT("BuildManager"));
 	if (BuildManager) {
@@ -178,7 +178,7 @@ float AGDKCharacter::TakeDamage(float Damage, const FDamageEvent& DamageEvent, A
 	return Damage;
 }
 
-
+/*
 void AGDKCharacter::AttachProtoTeamComponent(FGenericTeamId teamInt)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Green, FString::FromInt(this->GetComponents().Num()));
@@ -195,7 +195,7 @@ void AGDKCharacter::AttachProtoTeamComponent(FGenericTeamId teamInt)
 	TeamTag->RegisterComponent();
 	GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Red, FString::FromInt(this->GetComponents().Num()));
 }
-
+*/
 
 void AGDKCharacter::TakeDamageCrossServer_Implementation(float Damage, const FDamageEvent& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
