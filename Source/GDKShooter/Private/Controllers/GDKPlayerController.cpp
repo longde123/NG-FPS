@@ -66,7 +66,7 @@ AGDKPlayerController::AGDKPlayerController()
 
 	PlayerBubbleComponent = CreateDefaultSubobject<UComponentClassConstraint>(TEXT("PlayerBubbleComponent"));
 	PlayerBubbleComponent->ComponentClass = UTagComponent::StaticClass();
-	PlayerBubbleComponent->bIncludeDerivedClasses = false;
+	PlayerBubbleComponent->bIncludeDerivedClasses = true;
 
 	PlayerBubbleAnd = CreateDefaultSubobject<UAndConstraint>(TEXT("PlayerBubbleAnd"));
 	PlayerBubbleAnd->Constraints.Add(PlayerBubbleComponent);
@@ -177,18 +177,21 @@ void AGDKPlayerController::QueryTest()
 		//Is red team, get interst on Blue team
 		RelativeSphere->Radius = 15000;
 		PlayerBubbleComponent->ComponentClass = UTagComponent::StaticClass();
+		PlayerBubbleComponent->bIncludeDerivedClasses = true;
 		//GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Blue, charOwned->GetName() + " " + FString::FromInt(tcomp->GetTeam()));
 
 	}
 	else {
 		RelativeSphere->Radius = 20000;
 		PlayerBubbleComponent->ComponentClass = UTagComponent::StaticClass();
+		PlayerBubbleComponent->bIncludeDerivedClasses = true;
 		//GEngine->AddOnScreenDebugMessage(-1, 15, FColor::Red, charOwned->GetName() + " " + FString::FromInt(tcomp->GetTeam()));
 	}
 	
 
 	PlayerBubbleAnd->Constraints.Empty();
 	PlayerBubbleAnd->Constraints.Add(PlayerBubbleComponent);
+	PlayerBubbleAnd->Constraints.Add(Actor1);
 	PlayerBubbleAnd->Constraints.Add(RelativeSphere);
 
 	ActorInterestComponent->Queries[0].Constraint = PlayerBubbleAnd;

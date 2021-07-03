@@ -124,8 +124,8 @@ void UTeamDeathmatchSpawnerComponent::RequestSpawn(APlayerController* Controller
 			TeamComponent->SetTeam(FGenericTeamId(TeamId));
 
 			//Team Tag fix
-			//AGDKCharacter* MyChar = (AGDKCharacter*)TeamComponent->GetOwner();
-			//MyChar->AttachProtoTeamComponent(TeamId);
+			AGDKCharacter* MyChar = (AGDKCharacter*)TeamComponent->GetOwner();
+			MyChar->AttachProtoTeamComponent(TeamId);
 		}
 		else
 		{
